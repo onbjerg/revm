@@ -20,6 +20,14 @@ pub trait Database {
     fn code_by_hash(&mut self, code_hash: B256) -> Result<Bytecode, Self::Error>;
     /// Get storage value of address at index.
     fn storage(&mut self, address: B160, index: U256) -> Result<U256, Self::Error>;
+    /// Get storage value of address at index.
+    ///
+    /// This differs from `storage` in that this is only called for explicit `sload`s, whereas
+    /// `storage` may be called for implicit storage reads (e.g. for `sstore`s).
+    #[inline]
+    fn sload(&mut self, address: B160, index: U256) -> Result<U256, Self::Error> {
+        self.storage(address, index)
+    }
 
     // History related
     fn block_hash(&mut self, number: U256) -> Result<B256, Self::Error>;

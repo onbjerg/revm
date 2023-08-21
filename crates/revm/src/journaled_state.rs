@@ -626,6 +626,7 @@ impl JournaledState {
         address: B160,
         key: U256,
         db: &mut DB,
+        explicit: bool,
     ) -> Result<(U256, bool), DB::Error> {
         let account = self.state.get_mut(&address).unwrap(); // assume acc is hot
                                                              // only if account is created in this tx we can assume that storage is empty.
@@ -637,7 +638,11 @@ impl JournaledState {
                 let value = if is_newly_created {
                     U256::ZERO
                 } else {
-                    db.storage(address, key)?
+                    if explicit {
+                        db.sload(address, key)?
+                    } else {
+                        db.storage(address, key)?
+                    }
                 };
                 // add it to journal as cold loaded.
                 self.journal
@@ -667,7 +672,7 @@ impl JournaledState {
         db: &mut DB,
     ) -> Result<(U256, U256, U256, bool), DB::Error> {
         // assume that acc exists and load the slot.
-        let (present, is_cold) = self.sload(address, key, db)?;
+        let (present, is_cold) = self.sload(address, key, db, false)?;
         let acc = self.state.get_mut(&address).unwrap();
 
         // if there is no original value in dirty return present value, that is our original.

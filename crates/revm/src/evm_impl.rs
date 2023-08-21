@@ -771,7 +771,7 @@ impl<'a, GSPEC: Spec, DB: Database + 'a, const INSPECT: bool> Host
         // account is always hot. reference on that statement https://eips.ethereum.org/EIPS/eip-2929 see `Note 2:`
         self.data
             .journaled_state
-            .sload(address, index, self.data.db)
+            .sload(address, index, self.data.db, true)
             .map_err(|e| self.data.error = Some(e))
             .ok()
     }
